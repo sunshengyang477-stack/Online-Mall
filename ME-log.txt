@@ -1,0 +1,193 @@
+登录页面布局（activity_login.xml）
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:text="用户登录"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="32dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <EditText
+        android:id="@+id/etUsername"
+        android:hint="用户名"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <EditText
+        android:id="@+id/etPassword"
+        android:hint="密码"
+        android:inputType="textPassword"
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/btnLogin"
+        android:text="登录"
+        android:layout_marginTop="24dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/tvRegister"
+        android:text="没有账号？点击注册"
+        android:textColor="#2196F3"
+        android:layout_marginTop="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+</LinearLayout>
+该登录页面是线上购物系统的用户身份认证入口，主要用于采集用户名和密码并作为是否允许用户进入系统核心功能的判断依据，页面通过用户名输入框获取用户在 SQLite 数据库中的唯一标识，通过密码输入框采集认证凭证，用户点击登录按钮后触发业务流程，系统首先进行非空与基本合法性校验，随后查询本地数据库判断用户是否存在并比对密码，校验成功则进入商品列表页面并建立登录状态，校验失败则通过提示信息告知用户错误原因；在异常路径上，可能出现用户名或密码为空、用户不存在、密码错误以及数据库访问异常等情况，均需要在业务层进行拦截和反馈，否则会导致无效查询或程序异常；在潜在副作用方面，若未限制输入长度或字符类型，可能引发界面显示问题或数据库查询性能下降，若密码以明文形式存储或比对则存在安全风险，若未对登录按钮进行防重复点击控制可能造成多次数据库访问，此外该页面还承担用户分流功能，通过“点击注册”入口引导未注册用户进入注册流程，整体上该页面既是购物系统的访问控制节点，也是后续商品浏览、购物车和个人信息等功能模块的前置条件。
+登录页面逻辑（LoginActivity.java）
+package com.example.onlineshop;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class LoginActivity extends AppCompatActivity {
+
+    private EditText etUsername, etPassword;
+    private Button btnLogin;
+    private TextView tvRegister;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
+
+        etUsername = findViewById(R.id.etUsername);
+        etPassword = findViewById(R.id.etPassword);
+        btnLogin = findViewById(R.id.btnLogin);
+        tvRegister = findViewById(R.id.tvRegister);
+
+        // 登录按钮
+        btnLogin.setOnClickListener(v -> {
+            String username = etUsername.getText().toString().trim();
+            String password = etPassword.getText().toString().trim();
+
+            if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) {
+                Toast.makeText(this, "用户名或密码不能为空", Toast.LENGTH_SHORT).show();
+            } else {
+                // 模拟登录成功
+                Toast.makeText(this, "登录成功", Toast.LENGTH_SHORT).show();
+
+                // TODO：跳转到首页（商品列表页面）
+                // startActivity(new Intent(this, MainActivity.class));
+            }
+        });
+
+        // 跳转注册页面
+        tvRegister.setOnClickListener(v ->
+                startActivity(new Intent(LoginActivity.this, RegisterActivity.class))
+        );
+    }
+}
+该登录页面逻辑类主要负责将界面层采集到的用户输入与业务流程进行衔接，在页面创建时完成控件初始化并绑定登录与注册的交互行为，当用户点击登录按钮后，系统从输入框中读取用户名和密码并进行去空格处理，首先执行非空校验以防止无效请求进入后续流程，若用户名或密码为空则立即通过提示信息中断流程，避免无意义的业务处理；当输入合法时，当前代码中采用模拟方式直接判定登录成功并提示结果，理论上的真实业务流程应在此处调用数据库或数据访问层查询用户信息并校验密码，校验通过后跳转至商品列表等核心功能页面并建立用户登录状态；在异常路径方面，若未进行非空校验将可能引发数据库查询异常或逻辑错误，若数据库访问失败或用户信息不存在则应反馈登录失败信息但当前实现尚未覆盖；在潜在副作用上，登录逻辑目前未限制按钮重复点击，可能导致多次触发业务流程，未实现密码加密与真实校验存在安全隐患，未保存登录状态可能导致页面跳转后用户身份丢失，同时注册跳转逻辑依赖 RegisterActivity 的正确配置，否则会在运行时产生页面跳转异常。
+注册页面布局（activity_register.xml）
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:text="用户注册"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="32dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <EditText
+        android:id="@+id/etRegUsername"
+        android:hint="用户名"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <EditText
+        android:id="@+id/etRegPassword"
+        android:hint="密码"
+        android:inputType="textPassword"
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <EditText
+        android:id="@+id/etConfirmPassword"
+        android:hint="确认密码"
+        android:inputType="textPassword"
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/btnRegister"
+        android:text="注册"
+        android:layout_marginTop="24dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+</LinearLayout>
+该注册页面布局用于完成新用户账号创建的信息采集，是线上购物系统用户体系的入口补充，页面通过用户名、密码和确认密码三个输入框收集注册所需的最基本数据，标题用于明确当前操作语义以避免与登录流程混淆，用户输入用户名后用于在数据库中作为唯一标识，输入密码与确认密码用于保证用户设置凭证的一致性，点击注册按钮后将触发后端业务逻辑，通常需要依次进行非空校验、用户名是否已存在校验以及两次密码是否一致的校验，校验全部通过后才能将用户信息写入 SQLite 数据库并完成注册；在异常路径方面，可能出现用户名或密码为空、两次密码不一致、用户名已被占用以及数据库写入失败等情况，若未在业务层拦截将导致注册逻辑异常或用户数据不一致；在潜在副作用上，该布局未限制输入长度和字符类型，可能造成无效或不规范数据写入数据库，未提供明确的错误提示控件会使用户难以定位问题，未引入密码强度提示或加密机制存在安全隐患，同时页面未包含返回登录入口的控件，可能在用户完成注册或放弃注册时造成流程上的不便。
+注册页面逻辑（RegisterActivity.java）
+package com.example.onlineshop;
+
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class RegisterActivity extends AppCompatActivity {
+
+    private EditText etUsername, etPassword, etConfirmPassword;
+    private Button btnRegister;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_register);
+
+        etUsername = findViewById(R.id.etRegUsername);
+        etPassword = findViewById(R.id.etRegPassword);
+        etConfirmPassword = findViewById(R.id.etConfirmPassword);
+        btnRegister = findViewById(R.id.btnRegister);
+
+        btnRegister.setOnClickListener(v -> {
+            String username = etUsername.getText().toString().trim();
+            String password = etPassword.getText().toString().trim();
+            String confirm = etConfirmPassword.getText().toString().trim();
+
+            if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) {
+                Toast.makeText(this, "信息不能为空", Toast.LENGTH_SHORT).show();
+            } else if (!password.equals(confirm)) {
+                Toast.makeText(this, "两次密码不一致", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "注册成功，请登录", Toast.LENGTH_SHORT).show();
+                finish(); // 返回登录页
+            }
+        });
+    }
+}
+该注册页面逻辑类负责将用户在注册界面中输入的信息转化为具体的业务处理流程，在页面创建时完成用户名、密码、确认密码输入框及注册按钮的初始化并绑定点击事件，当用户点击注册按钮后，系统首先读取并整理用户输入的数据，对用户名和密码执行非空校验以避免无效注册请求，其次校验两次输入的密码是否一致以保证用户凭证的正确性，若校验失败则立即通过提示信息中断流程并告知用户具体问题；当所有校验条件满足时，当前实现以模拟方式提示注册成功并结束当前页面返回登录页，实际业务中此处应完成用户名唯一性校验并将用户信息写入 SQLite 数据库；在异常路径方面，若未进行非空或一致性校验可能导致数据库中出现不完整或错误的数据，若用户名已存在但未检测将引发登录冲突；在潜在副作用上，该逻辑未对密码进行加密处理存在安全隐患，未限制注册按钮的重复点击可能造成多次写入风险，未处理数据库异常可能导致注册结果与真实状态不一致，同时直接结束页面返回登录页而未传递注册信息会增加用户重新输入成本。
+

@@ -1,0 +1,849 @@
+Curator：
+我需要用Androidstudio完成一个线上线上购物系统，相关配置jdk8，前端xml语言，后端Java语言，系统包括注册、登录、商品浏览、商品详情、购物车、个人信息等功能，现在给我一个登录注册页面的代码
+Ai：
+下面给你一个可直接在 Android Studio（JDK8、XML + Java）中使用的【登录 + 注册】基础示例，结构清晰、适合你现在做的线上购物系统课程/毕业设计，后续也方便你接数据库或服务器接口。
+
+一、功能说明
+
+本示例包含：
+
+登录页面
+
+注册页面
+
+页面跳转
+
+简单的输入校验（不连数据库，后续可扩展）
+
+👉 适合你现在阶段，先跑通界面和逻辑
+
+二、项目结构（关键部分）
+app
+ └─ java/com/example/onlineshop
+    ├─ LoginActivity.java
+    ├─ RegisterActivity.java
+ └─ res
+    ├─ layout
+    │   ├─ activity_login.xml
+    │   ├─ activity_register.xml
+
+三、登录页面布局（activity_login.xml）
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:text="用户登录"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="32dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <EditText
+        android:id="@+id/etUsername"
+        android:hint="用户名"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <EditText
+        android:id="@+id/etPassword"
+        android:hint="密码"
+        android:inputType="textPassword"
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/btnLogin"
+        android:text="登录"
+        android:layout_marginTop="24dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/tvRegister"
+        android:text="没有账号？点击注册"
+        android:textColor="#2196F3"
+        android:layout_marginTop="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+</LinearLayout>
+
+四、登录页面逻辑（LoginActivity.java）
+package com.example.onlineshop;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class LoginActivity extends AppCompatActivity {
+
+    private EditText etUsername, etPassword;
+    private Button btnLogin;
+    private TextView tvRegister;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
+
+        etUsername = findViewById(R.id.etUsername);
+        etPassword = findViewById(R.id.etPassword);
+        btnLogin = findViewById(R.id.btnLogin);
+        tvRegister = findViewById(R.id.tvRegister);
+
+        // 登录按钮
+        btnLogin.setOnClickListener(v -> {
+            String username = etUsername.getText().toString().trim();
+            String password = etPassword.getText().toString().trim();
+
+            if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) {
+                Toast.makeText(this, "用户名或密码不能为空", Toast.LENGTH_SHORT).show();
+            } else {
+                // 模拟登录成功
+                Toast.makeText(this, "登录成功", Toast.LENGTH_SHORT).show();
+
+                // TODO：跳转到首页（商品列表页面）
+                // startActivity(new Intent(this, MainActivity.class));
+            }
+        });
+
+        // 跳转注册页面
+        tvRegister.setOnClickListener(v ->
+                startActivity(new Intent(LoginActivity.this, RegisterActivity.class))
+        );
+    }
+}
+
+五、注册页面布局（activity_register.xml）
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:text="用户注册"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="32dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <EditText
+        android:id="@+id/etRegUsername"
+        android:hint="用户名"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <EditText
+        android:id="@+id/etRegPassword"
+        android:hint="密码"
+        android:inputType="textPassword"
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <EditText
+        android:id="@+id/etConfirmPassword"
+        android:hint="确认密码"
+        android:inputType="textPassword"
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/btnRegister"
+        android:text="注册"
+        android:layout_marginTop="24dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+</LinearLayout>
+
+六、注册页面逻辑（RegisterActivity.java）
+package com.example.onlineshop;
+
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class RegisterActivity extends AppCompatActivity {
+
+    private EditText etUsername, etPassword, etConfirmPassword;
+    private Button btnRegister;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_register);
+
+        etUsername = findViewById(R.id.etRegUsername);
+        etPassword = findViewById(R.id.etRegPassword);
+        etConfirmPassword = findViewById(R.id.etConfirmPassword);
+        btnRegister = findViewById(R.id.btnRegister);
+
+        btnRegister.setOnClickListener(v -> {
+            String username = etUsername.getText().toString().trim();
+            String password = etPassword.getText().toString().trim();
+            String confirm = etConfirmPassword.getText().toString().trim();
+
+            if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) {
+                Toast.makeText(this, "信息不能为空", Toast.LENGTH_SHORT).show();
+            } else if (!password.equals(confirm)) {
+                Toast.makeText(this, "两次密码不一致", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "注册成功，请登录", Toast.LENGTH_SHORT).show();
+                finish(); // 返回登录页
+            }
+        });
+    }
+}
+
+七、AndroidManifest.xml 注册 Activity
+
+别忘了在 AndroidManifest.xml 中添加：
+
+<activity android:name=".RegisterActivity" />
+<activity android:name=".LoginActivity">
+    <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+    </intent-filter>
+</activity>
+
+八、后续我可以继续帮你做的（一步步来）
+
+你这个项目非常标准，适合课程设计 / 毕设，我可以继续帮你：
+
+✅ 使用 SQLite / Room 实现真正的用户注册登录
+
+✅ 商品列表 RecyclerView
+
+✅ 商品详情页面
+
+✅ 购物车逻辑（数量 + 总价）
+
+✅ SharedPreferences 保存登录状态
+
+✅ 写《系统设计说明书》《需求分析》
+
+如果你愿意，下一步我可以直接帮你把登录注册改成 SQLite 数据库存储版，老师看了也很加分 👍
+Curator：
+使用 SQLite实现真正的用户注册登录
+Ai：
+好，这一步非常关键👍
+下面我给你一套完整、可运行的「SQLite 用户注册 + 登录」实现方案，完全符合 Android Studio + JDK8 + Java + XML，适合线上购物系统课程设计/毕设。
+
+✅ 不依赖网络
+✅ 使用 SQLiteOpenHelper
+✅ 注册写入数据库
+✅ 登录从数据库校验
+✅ 结构清晰，老师一看就懂
+
+一、实现思路（你可以写进报告）
+
+使用 SQLite 创建 user 表
+
+注册时将用户名和密码存入数据库
+
+登录时根据用户名和密码查询数据库
+
+登录成功 → 进入商品首页（后续扩展）
+
+二、数据库表设计（user 表）
+字段名	类型	说明
+id	INTEGER	主键，自增
+username	TEXT	用户名
+password	TEXT	密码
+三、创建数据库工具类（UserDBHelper.java）
+
+📍路径：java/com/example/onlineshop/db/UserDBHelper.java
+
+package com.example.onlineshop.db;
+
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
+public class UserDBHelper extends SQLiteOpenHelper {
+
+    private static final String DB_NAME = "shop.db";
+    private static final int DB_VERSION = 1;
+
+    public UserDBHelper(Context context) {
+        super(context, DB_NAME, null, DB_VERSION);
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        String sql = "CREATE TABLE user (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "username TEXT UNIQUE," +
+                "password TEXT)";
+        db.execSQL(sql);
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // 暂不处理
+    }
+}
+
+四、用户数据操作类（UserDao.java）
+
+📍路径：java/com/example/onlineshop/db/UserDao.java
+
+package com.example.onlineshop.db;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+
+public class UserDao {
+
+    private final UserDBHelper dbHelper;
+
+    public UserDao(Context context) {
+        dbHelper = new UserDBHelper(context);
+    }
+
+    // 注册用户
+    public boolean register(String username, String password) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put("username", username);
+        values.put("password", password);
+
+        long result = db.insert("user", null, values);
+        db.close();
+
+        return result != -1;
+    }
+
+    // 登录验证
+    public boolean login(String username, String password) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        String sql = "SELECT * FROM user WHERE username=? AND password=?";
+        Cursor cursor = db.rawQuery(sql, new String[]{username, password});
+
+        boolean success = cursor.moveToFirst();
+        cursor.close();
+        db.close();
+
+        return success;
+    }
+
+    // 判断用户名是否存在
+    public boolean isUserExist(String username) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT * FROM user WHERE username=?",
+                new String[]{username});
+
+        boolean exist = cursor.moveToFirst();
+        cursor.close();
+        db.close();
+        return exist;
+    }
+}
+
+五、修改注册页面逻辑（RegisterActivity.java）
+
+🔁 替换之前的模拟代码
+
+import com.example.onlineshop.db.UserDao;
+
+public class RegisterActivity extends AppCompatActivity {
+
+    private EditText etUsername, etPassword, etConfirmPassword;
+    private Button btnRegister;
+    private UserDao userDao;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_register);
+
+        userDao = new UserDao(this);
+
+        etUsername = findViewById(R.id.etRegUsername);
+        etPassword = findViewById(R.id.etRegPassword);
+        etConfirmPassword = findViewById(R.id.etConfirmPassword);
+        btnRegister = findViewById(R.id.btnRegister);
+
+        btnRegister.setOnClickListener(v -> {
+            String username = etUsername.getText().toString().trim();
+            String password = etPassword.getText().toString().trim();
+            String confirm = etConfirmPassword.getText().toString().trim();
+
+            if (username.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "信息不能为空", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (!password.equals(confirm)) {
+                Toast.makeText(this, "两次密码不一致", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (userDao.isUserExist(username)) {
+                Toast.makeText(this, "用户名已存在", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            boolean success = userDao.register(username, password);
+            if (success) {
+                Toast.makeText(this, "注册成功，请登录", Toast.LENGTH_SHORT).show();
+                finish();
+            } else {
+                Toast.makeText(this, "注册失败", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+}
+
+六、修改登录页面逻辑（LoginActivity.java）
+import com.example.onlineshop.db.UserDao;
+
+public class LoginActivity extends AppCompatActivity {
+
+    private EditText etUsername, etPassword;
+    private Button btnLogin;
+    private TextView tvRegister;
+    private UserDao userDao;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
+
+        userDao = new UserDao(this);
+
+        etUsername = findViewById(R.id.etUsername);
+        etPassword = findViewById(R.id.etPassword);
+        btnLogin = findViewById(R.id.btnLogin);
+        tvRegister = findViewById(R.id.tvRegister);
+
+        btnLogin.setOnClickListener(v -> {
+            String username = etUsername.getText().toString().trim();
+            String password = etPassword.getText().toString().trim();
+
+            if (username.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "请输入用户名和密码", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            boolean success = userDao.login(username, password);
+            if (success) {
+                Toast.makeText(this, "登录成功", Toast.LENGTH_SHORT).show();
+
+                // TODO 跳转商品首页
+                // startActivity(new Intent(this, MainActivity.class));
+            } else {
+                Toast.makeText(this, "用户名或密码错误", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        tvRegister.setOnClickListener(v ->
+                startActivity(new Intent(this, RegisterActivity.class)));
+    }
+}
+
+七、运行效果（老师最爱这种）
+
+✔ 注册 → 数据写入 SQLite
+✔ 登录 → 本地数据库校验
+✔ 不需要服务器
+✔ 清晰 MVC 分层（Activity + Dao + DB）
+
+八、下一步我可以继续帮你（直接进阶）
+
+你这个项目已经正式进入“完整系统”阶段了，我可以继续帮你：
+
+1️⃣ 登录成功后 SharedPreferences 保存登录状态
+2️⃣ 商品表（goods）+ RecyclerView 商品列表
+3️⃣ 购物车表（cart）+ 数量 + 总价
+4️⃣ 用户个人信息页面
+5️⃣ 生成 课程设计 / 毕设说明文档
+
+👉 你直接告诉我：
+「下一步做商品列表」还是「先做购物车」？
+Curator：
+下一步做商品列表
+Ai：
+太好了 👍
+**商品列表 = 线上购物系统的核心功能**，老师基本都会重点看这一块。
+下面我给你一套**完整的「SQLite + RecyclerView 商品列表」实现方案**，一步步来，**直接能跑**。
+
+---
+
+# 一、商品列表实现效果
+
+✔ 商品图片
+✔ 商品名称
+✔ 商品价格
+✔ RecyclerView 列表展示
+✔ 数据来自 SQLite 数据库
+
+> 后续可无缝接：**商品详情页 / 购物车**
+
+---
+
+# 二、整体结构（新增部分）
+
+```text
+java/com/example/onlineshop
+ ├─ MainActivity.java        // 商品列表页面
+ ├─ adapter
+ │   └─ GoodsAdapter.java
+ ├─ model
+ │   └─ Goods.java
+ ├─ db
+ │   ├─ GoodsDao.java
+ │   └─ UserDBHelper.java
+res
+ ├─ layout
+ │   ├─ activity_main.xml
+ │   ├─ item_goods.xml
+```
+
+---
+
+# 三、商品实体类（Goods.java）
+
+📍`model/Goods.java`
+
+```java
+package com.example.onlineshop.model;
+
+public class Goods {
+    private int id;
+    private String name;
+    private double price;
+    private int imageResId;
+
+    public Goods(int id, String name, double price, int imageResId) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.imageResId = imageResId;
+    }
+
+    public int getId() { return id; }
+    public String getName() { return name; }
+    public double getPrice() { return price; }
+    public int getImageResId() { return imageResId; }
+}
+```
+
+---
+
+# 四、数据库升级：添加商品表
+
+🔁 **修改 `UserDBHelper.java`**
+
+```java
+@Override
+public void onCreate(SQLiteDatabase db) {
+    String userSql = "CREATE TABLE user (" +
+            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "username TEXT UNIQUE," +
+            "password TEXT)";
+
+    String goodsSql = "CREATE TABLE goods (" +
+            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "name TEXT," +
+            "price REAL," +
+            "image INTEGER)";
+
+    db.execSQL(userSql);
+    db.execSQL(goodsSql);
+
+    // 初始化商品数据
+    db.execSQL("INSERT INTO goods(name,price,image) VALUES" +
+            "('手机',3999, " + R.drawable.goods_phone + ")," +
+            "('电脑',6999, " + R.drawable.goods_pc + ")," +
+            "('耳机',299, " + R.drawable.goods_headset + ")");
+}
+```
+
+⚠️ **注意**：
+图片资源需要你在 `res/drawable/` 下放入：
+
+```text
+goods_phone.png
+goods_pc.png
+goods_headset.png
+```
+
+---
+
+# 五、商品数据访问类（GoodsDao.java）
+
+📍`db/GoodsDao.java`
+
+```java
+package com.example.onlineshop.db;
+
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+
+import com.example.onlineshop.model.Goods;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class GoodsDao {
+
+    private final UserDBHelper dbHelper;
+
+    public GoodsDao(Context context) {
+        dbHelper = new UserDBHelper(context);
+    }
+
+    public List<Goods> getAllGoods() {
+        List<Goods> list = new ArrayList<>();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM goods", null);
+        while (cursor.moveToNext()) {
+            int id = cursor.getInt(0);
+            String name = cursor.getString(1);
+            double price = cursor.getDouble(2);
+            int image = cursor.getInt(3);
+
+            list.add(new Goods(id, name, price, image));
+        }
+
+        cursor.close();
+        db.close();
+        return list;
+    }
+}
+```
+
+---
+
+# 六、商品列表 Item 布局（item_goods.xml）
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/imgGoods"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/goods_phone" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_marginLeft="12dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tvName"
+            android:text="商品名"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/tvPrice"
+            android:text="￥0.00"
+            android:textColor="#E91E63"
+            android:textSize="16sp"
+            android:layout_marginTop="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+</LinearLayout>
+```
+
+---
+
+# 七、RecyclerView 适配器（GoodsAdapter.java）
+
+📍`adapter/GoodsAdapter.java`
+
+```java
+package com.example.onlineshop.adapter;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.onlineshop.R;
+import com.example.onlineshop.model.Goods;
+
+import java.util.List;
+
+public class GoodsAdapter extends RecyclerView.Adapter<GoodsAdapter.ViewHolder> {
+
+    private final Context context;
+    private final List<Goods> goodsList;
+
+    public GoodsAdapter(Context context, List<Goods> goodsList) {
+        this.context = context;
+        this.goodsList = goodsList;
+    }
+
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        ImageView img;
+        TextView name, price;
+
+        ViewHolder(View view) {
+            super(view);
+            img = view.findViewById(R.id.imgGoods);
+            name = view.findViewById(R.id.tvName);
+            price = view.findViewById(R.id.tvPrice);
+        }
+    }
+
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(context)
+                .inflate(R.layout.item_goods, parent, false);
+        return new ViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        Goods goods = goodsList.get(position);
+        holder.name.setText(goods.getName());
+        holder.price.setText("￥" + goods.getPrice());
+        holder.img.setImageResource(goods.getImageResId());
+    }
+
+    @Override
+    public int getItemCount() {
+        return goodsList.size();
+    }
+}
+```
+
+---
+
+# 八、商品列表页面（activity_main.xml）
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+```
+
+---
+
+# 九、商品列表页面逻辑（MainActivity.java）
+
+```java
+package com.example.onlineshop;
+
+import android.os.Bundle;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.onlineshop.adapter.GoodsAdapter;
+import com.example.onlineshop.db.GoodsDao;
+
+public class MainActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        GoodsDao goodsDao = new GoodsDao(this);
+        GoodsAdapter adapter = new GoodsAdapter(this, goodsDao.getAllGoods());
+
+        recyclerView.setAdapter(adapter);
+    }
+}
+```
+
+---
+
+# 十、登录成功跳转商品列表
+
+在 `LoginActivity` 中修改：
+
+```java
+startActivity(new Intent(this, MainActivity.class));
+finish();
+```
+
+---
+
+# 十一、你现在这个项目已经达到：
+
+✅ 登录 / 注册（SQLite）
+✅ 商品列表（RecyclerView + SQLite）
+
+**已经是一个完整电商 App 雏形**，完全符合大四课程设计要求。
+
+---
+
+## 下一步强烈推荐（老师加分项）
+
+1️⃣ 商品点击 → 商品详情页
+2️⃣ 购物车（SQLite 表 + 数量）
+3️⃣ 登录状态保持（SharedPreferences）
+
+👉 你选一个：
+**「商品详情页」** 还是 **「购物车功能」**？
+
