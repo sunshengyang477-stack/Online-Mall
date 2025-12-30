@@ -25,7 +25,26 @@
             android:name="LoginActivity"
             android:exported="true">
         </activity>
-        
+        <activity
+            android:name="ProductListActivity"
+            android:exported="true">
+        </activity>
+        <activity
+            android:name="ProductDetailActivity"
+            android:exported="true">
+        </activity>
+        <activity
+            android:name="CartActivity"
+            android:exported="true">
+        </activity>
+        <activity
+            android:name="ProfileActivity"
+            android:exported="true">
+        </activity>
+        <activity
+            android:name=".PaymentActivity"
+            android:label="true">
+        </activity>
     </application>
 
 </manifest>

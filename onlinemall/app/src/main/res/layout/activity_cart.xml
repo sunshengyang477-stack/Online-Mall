@@ -41,7 +41,7 @@
             android:layout_marginTop="8dp"
             android:text="结算"
             android:textAllCaps="false"
-            app:backgroundTint="@color/colorPrimary" />
+            app:backgroundTint="#43A047" />
     </LinearLayout>
 
     <!-- 添加底部导航栏 -->

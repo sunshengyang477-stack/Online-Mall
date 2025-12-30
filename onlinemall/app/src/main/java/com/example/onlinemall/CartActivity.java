@@ -47,6 +47,20 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
 
         buttonCheckout.setOnClickListener(v -> {
             if (cartManager.getCartItemCount() > 0) {
+                // 跳转到支付页面，传递总金额
+                Intent intent = new Intent(CartActivity.this, PaymentActivity.class);
+                intent.putExtra("TOTAL_AMOUNT", cartManager.getTotalPrice());
+                startActivity(intent);
+
+                // 可选：清空购物车（或者等到支付成功后再清空）
+                // cartManager.clearCart();
+            } else {
+                Toast.makeText(this, "购物车为空", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        /*buttonCheckout.setOnClickListener(v -> {
+            if (cartManager.getCartItemCount() > 0) {
                 // 模拟结算过程
                 Toast.makeText(this, "结算成功！总金额: ¥" + cartManager.getTotalPrice(), Toast.LENGTH_SHORT).show();
                 cartManager.clearCart();
@@ -54,7 +68,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
             } else {
                 Toast.makeText(this, "购物车为空", Toast.LENGTH_SHORT).show();
             }
-        });
+        });*/
     }
 
     private void setupRecyclerView() {
