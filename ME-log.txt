@@ -1,193 +1,109 @@
-登录页面布局（activity_login.xml）
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:gravity="center"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+Android Online-Mall系统关键代码的心理执行
 
-    <TextView
-        android:text="用户登录"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="32dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+===================== 一、用户登录注册（SQLite） =====================
 
-    <EditText
-        android:id="@+id/etUsername"
-        android:hint="用户名"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+UserDBHelper.java
 
-    <EditText
-        android:id="@+id/etPassword"
-        android:hint="密码"
-        android:inputType="textPassword"
-        android:layout_marginTop="16dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+public class UserDBHelper extends SQLiteOpenHelper { private static
+final String DB_NAME = “shop.db”; private static final int DB_VERSION =
+4;
 
-    <Button
-        android:id="@+id/btnLogin"
-        android:text="登录"
-        android:layout_marginTop="24dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
-    <TextView
-        android:id="@+id/tvRegister"
-        android:text="没有账号？点击注册"
-        android:textColor="#2196F3"
-        android:layout_marginTop="16dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
-</LinearLayout>
-该登录页面是线上购物系统的用户身份认证入口，主要用于采集用户名和密码并作为是否允许用户进入系统核心功能的判断依据，页面通过用户名输入框获取用户在 SQLite 数据库中的唯一标识，通过密码输入框采集认证凭证，用户点击登录按钮后触发业务流程，系统首先进行非空与基本合法性校验，随后查询本地数据库判断用户是否存在并比对密码，校验成功则进入商品列表页面并建立登录状态，校验失败则通过提示信息告知用户错误原因；在异常路径上，可能出现用户名或密码为空、用户不存在、密码错误以及数据库访问异常等情况，均需要在业务层进行拦截和反馈，否则会导致无效查询或程序异常；在潜在副作用方面，若未限制输入长度或字符类型，可能引发界面显示问题或数据库查询性能下降，若密码以明文形式存储或比对则存在安全风险，若未对登录按钮进行防重复点击控制可能造成多次数据库访问，此外该页面还承担用户分流功能，通过“点击注册”入口引导未注册用户进入注册流程，整体上该页面既是购物系统的访问控制节点，也是后续商品浏览、购物车和个人信息等功能模块的前置条件。
-登录页面逻辑（LoginActivity.java）
-package com.example.onlineshop;
-
-import android.content.Intent;
-import android.os.Bundle;
-import android.text.TextUtils;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.appcompat.app.AppCompatActivity;
-
-public class LoginActivity extends AppCompatActivity {
-
-    private EditText etUsername, etPassword;
-    private Button btnLogin;
-    private TextView tvRegister;
+    public UserDBHelper(Context context) {
+        super(context, DB_NAME, null, DB_VERSION);
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-
-        etUsername = findViewById(R.id.etUsername);
-        etPassword = findViewById(R.id.etPassword);
-        btnLogin = findViewById(R.id.btnLogin);
-        tvRegister = findViewById(R.id.tvRegister);
-
-        // 登录按钮
-        btnLogin.setOnClickListener(v -> {
-            String username = etUsername.getText().toString().trim();
-            String password = etPassword.getText().toString().trim();
-
-            if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) {
-                Toast.makeText(this, "用户名或密码不能为空", Toast.LENGTH_SHORT).show();
-            } else {
-                // 模拟登录成功
-                Toast.makeText(this, "登录成功", Toast.LENGTH_SHORT).show();
-
-                // TODO：跳转到首页（商品列表页面）
-                // startActivity(new Intent(this, MainActivity.class));
-            }
-        });
-
-        // 跳转注册页面
-        tvRegister.setOnClickListener(v ->
-                startActivity(new Intent(LoginActivity.this, RegisterActivity.class))
-        );
+    public void onCreate(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE user(id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT)");
+        db.execSQL("CREATE TABLE goods(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, price REAL, image INTEGER, description TEXT)");
+        db.execSQL("CREATE TABLE cart(id INTEGER PRIMARY KEY AUTOINCREMENT, goods_id INTEGER, name TEXT, price REAL, image INTEGER, count INTEGER)");
+        db.execSQL("CREATE TABLE orders(id INTEGER PRIMARY KEY AUTOINCREMENT, total REAL, time TEXT)");
+        db.execSQL("CREATE TABLE order_item(id INTEGER PRIMARY KEY AUTOINCREMENT, order_id INTEGER, name TEXT, price REAL, count INTEGER)");
     }
-}
-该登录页面逻辑类主要负责将界面层采集到的用户输入与业务流程进行衔接，在页面创建时完成控件初始化并绑定登录与注册的交互行为，当用户点击登录按钮后，系统从输入框中读取用户名和密码并进行去空格处理，首先执行非空校验以防止无效请求进入后续流程，若用户名或密码为空则立即通过提示信息中断流程，避免无意义的业务处理；当输入合法时，当前代码中采用模拟方式直接判定登录成功并提示结果，理论上的真实业务流程应在此处调用数据库或数据访问层查询用户信息并校验密码，校验通过后跳转至商品列表等核心功能页面并建立用户登录状态；在异常路径方面，若未进行非空校验将可能引发数据库查询异常或逻辑错误，若数据库访问失败或用户信息不存在则应反馈登录失败信息但当前实现尚未覆盖；在潜在副作用上，登录逻辑目前未限制按钮重复点击，可能导致多次触发业务流程，未实现密码加密与真实校验存在安全隐患，未保存登录状态可能导致页面跳转后用户身份丢失，同时注册跳转逻辑依赖 RegisterActivity 的正确配置，否则会在运行时产生页面跳转异常。
-注册页面布局（activity_register.xml）
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:gravity="center"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <TextView
-        android:text="用户注册"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="32dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-    <EditText
-        android:id="@+id/etRegUsername"
-        android:hint="用户名"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
-    <EditText
-        android:id="@+id/etRegPassword"
-        android:hint="密码"
-        android:inputType="textPassword"
-        android:layout_marginTop="16dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
-    <EditText
-        android:id="@+id/etConfirmPassword"
-        android:hint="确认密码"
-        android:inputType="textPassword"
-        android:layout_marginTop="16dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
-    <Button
-        android:id="@+id/btnRegister"
-        android:text="注册"
-        android:layout_marginTop="24dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
-</LinearLayout>
-该注册页面布局用于完成新用户账号创建的信息采集，是线上购物系统用户体系的入口补充，页面通过用户名、密码和确认密码三个输入框收集注册所需的最基本数据，标题用于明确当前操作语义以避免与登录流程混淆，用户输入用户名后用于在数据库中作为唯一标识，输入密码与确认密码用于保证用户设置凭证的一致性，点击注册按钮后将触发后端业务逻辑，通常需要依次进行非空校验、用户名是否已存在校验以及两次密码是否一致的校验，校验全部通过后才能将用户信息写入 SQLite 数据库并完成注册；在异常路径方面，可能出现用户名或密码为空、两次密码不一致、用户名已被占用以及数据库写入失败等情况，若未在业务层拦截将导致注册逻辑异常或用户数据不一致；在潜在副作用上，该布局未限制输入长度和字符类型，可能造成无效或不规范数据写入数据库，未提供明确的错误提示控件会使用户难以定位问题，未引入密码强度提示或加密机制存在安全隐患，同时页面未包含返回登录入口的控件，可能在用户完成注册或放弃注册时造成流程上的不便。
-注册页面逻辑（RegisterActivity.java）
-package com.example.onlineshop;
-
-import android.os.Bundle;
-import android.text.TextUtils;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
-
-import androidx.appcompat.app.AppCompatActivity;
-
-public class RegisterActivity extends AppCompatActivity {
-
-    private EditText etUsername, etPassword, etConfirmPassword;
-    private Button btnRegister;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_register);
-
-        etUsername = findViewById(R.id.etRegUsername);
-        etPassword = findViewById(R.id.etRegPassword);
-        etConfirmPassword = findViewById(R.id.etConfirmPassword);
-        btnRegister = findViewById(R.id.btnRegister);
-
-        btnRegister.setOnClickListener(v -> {
-            String username = etUsername.getText().toString().trim();
-            String password = etPassword.getText().toString().trim();
-            String confirm = etConfirmPassword.getText().toString().trim();
-
-            if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) {
-                Toast.makeText(this, "信息不能为空", Toast.LENGTH_SHORT).show();
-            } else if (!password.equals(confirm)) {
-                Toast.makeText(this, "两次密码不一致", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "注册成功，请登录", Toast.LENGTH_SHORT).show();
-                finish(); // 返回登录页
-            }
-        });
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS user");
+        db.execSQL("DROP TABLE IF EXISTS goods");
+        db.execSQL("DROP TABLE IF EXISTS cart");
+        db.execSQL("DROP TABLE IF EXISTS orders");
+        db.execSQL("DROP TABLE IF EXISTS order_item");
+        onCreate(db);
     }
-}
-该注册页面逻辑类负责将用户在注册界面中输入的信息转化为具体的业务处理流程，在页面创建时完成用户名、密码、确认密码输入框及注册按钮的初始化并绑定点击事件，当用户点击注册按钮后，系统首先读取并整理用户输入的数据，对用户名和密码执行非空校验以避免无效注册请求，其次校验两次输入的密码是否一致以保证用户凭证的正确性，若校验失败则立即通过提示信息中断流程并告知用户具体问题；当所有校验条件满足时，当前实现以模拟方式提示注册成功并结束当前页面返回登录页，实际业务中此处应完成用户名唯一性校验并将用户信息写入 SQLite 数据库；在异常路径方面，若未进行非空或一致性校验可能导致数据库中出现不完整或错误的数据，若用户名已存在但未检测将引发登录冲突；在潜在副作用上，该逻辑未对密码进行加密处理存在安全隐患，未限制注册按钮的重复点击可能造成多次写入风险，未处理数据库异常可能导致注册结果与真实状态不一致，同时直接结束页面返回登录页而未传递注册信息会增加用户重新输入成本。
 
+}
+该代码负责整个线上购物系统本地 SQLite 数据库的创建与版本管理，在应用首次运行时统一创建用户表、商品表、购物车表、订单表及订单明细表，为后续所有业务功能提供数据持久化支持，数据库升级时通过删除旧表并重建新表来保证结构一致性，但该方式会导致历史数据丢失，若未提前做好数据迁移将产生严重业务副作用，同时在建表语句或升级过程中发生异常可能导致应用无法正常启动。
+===================== 二、商品列表（RecyclerView） =====================
+
+Goods.java
+
+public class Goods { private int id; private String name; private double
+price; private int imageResId; private String description; }
+该代码用于封装商品的基本属性信息，将数据库中的商品记录抽象为对象以便在业务层和界面层之间传递数据，它本身不包含业务逻辑，但若字段设计不完整或类型不匹配将导致商品信息展示不全或运行时数据错误。
+GoodsDao.java
+
+public List getAllGoods() { List list = new ArrayList<>();
+SQLiteDatabase db = dbHelper.getReadableDatabase(); Cursor c =
+db.rawQuery(“SELECT * FROM goods”, null); while (c.moveToNext()) {
+list.add(new Goods(c.getInt(0), c.getString(1), c.getDouble(2),
+c.getInt(3), c.getString(4))); } c.close(); db.close(); return list; }
+该代码负责从商品表中查询所有商品数据并转换为商品对象列表供界面展示，其核心业务逻辑是通过只读数据库连接和游标遍历实现数据读取，若游标或数据库未正确关闭可能引发内存泄露，若商品数据量过大且未分页查询则可能导致页面加载缓慢甚至界面卡顿。
+===================== 三、商品详情页 =====================
+
+GoodsDetailActivity.java
+
+int goodsId = getIntent().getIntExtra(“goods_id”, -1); Goods goods =
+goodsDao.getGoodsById(goodsId); btnAddCart.setOnClickListener(v ->
+cartDao.addToCart(goods));
+该代码通过接收上一个页面传递的商品标识加载对应商品详情，并在用户点击加入购物车按钮时将当前商品加入购物车，是商品浏览向交易行为过渡的关键节点，若商品标识未正确传递或为非法值将导致查询失败或空指针异常，从而影响用户正常操作流程。
+===================== 四、购物车功能 =====================
+
+CartDao.java
+
+public void addToCart(Goods goods) { SQLiteDatabase db =
+dbHelper.getWritableDatabase(); Cursor c = db.rawQuery(“SELECT count
+FROM cart WHERE goods_id=?”, new
+String[]{String.valueOf(goods.getId())}); if (c.moveToFirst()) {
+db.execSQL(“UPDATE cart SET count=count+1 WHERE goods_id=?”, new
+Object[]{goods.getId()}); } else { ContentValues v = new
+ContentValues(); v.put(“goods_id”, goods.getId()); v.put(“name”,
+goods.getName()); v.put(“price”, goods.getPrice()); v.put(“image”,
+goods.getImageResId()); v.put(“count”, 1); db.insert(“cart”, null, v); }
+c.close(); db.close(); }
+该代码实现购物车添加商品的核心业务逻辑，通过先查询购物车中是否已存在对应商品决定是更新数量还是新增记录，从而避免同一商品重复出现，该设计提升了数据整洁性，但在数据库异常、并发操作或中途退出情况下可能导致商品数量不一致，若未对数据库操作结果进行校验还可能造成用户看到的购物车状态与真实数据不符。
+===================== 五、订单结算 =====================
+
+OrderDao.java
+
+public boolean submitOrder(List cartList, double total) { SQLiteDatabase
+db = dbHelper.getWritableDatabase(); db.beginTransaction(); try {
+ContentValues order = new ContentValues(); order.put(“total”, total);
+order.put(“time”, getCurrentTime()); long orderId = db.insert(“orders”,
+null, order);
+
+        for (CartItem item : cartList) {
+            ContentValues v = new ContentValues();
+            v.put("order_id", orderId);
+            v.put("name", item.getName());
+            v.put("price", item.getPrice());
+            v.put("count", item.getCount());
+            db.insert("order_item", null, v);
+        }
+        db.execSQL("DELETE FROM cart");
+        db.setTransactionSuccessful();
+        return true;
+    } finally {
+        db.endTransaction();
+        db.close();
+    }
+
+}
+该代码负责将购物车中的商品统一生成订单并写入订单主表与订单明细表，使用事务机制保证订单数据写入与购物车清空操作的原子性，避免出现部分成功的异常状态，但若事务过程中发生异常而未向用户明确反馈，将导致用户无法判断订单是否提交成功，同时未校验订单金额与购物车数据一致性可能引发业务逻辑错误。
+===================== 六、订单列表 =====================
+
+public List getOrderList() { List list = new ArrayList<>();
+SQLiteDatabase db = dbHelper.getReadableDatabase(); Cursor c =
+db.rawQuery(“SELECT * FROM orders ORDER BY id DESC”, null); while
+(c.moveToNext()) { list.add(new Order(c.getInt(0), c.getDouble(1),
+c.getString(2))); } c.close(); db.close(); return list; }
+该代码用于按时间或编号倒序查询订单记录并生成订单对象列表，用于订单历史页面展示，其业务意义在于向用户提供可追溯的交易记录，但随着订单数据不断增长，若未引入分页或限制查询数量将对性能造成压力，严重时可能影响应用整体流畅度。
